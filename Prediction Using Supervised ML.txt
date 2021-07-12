@@ -1,0 +1,74 @@
+#Predict the percentage of a student based on the no. of study hours.
+
+#Load the required libraries
+
+library(ggplot2)
+library(readr)
+library(readxl)
+library(caTools)
+
+#Reading the data using read.table() function and assign it to the variable "d"# 
+
+d <- read.table("https://raw.githubusercontent.com/AdiPersonalWorks/Random/master/student_scores%20-%20student_scores.csv",sep = ",",header = T)
+d   #viewing the data here#
+summary(d)
+
+#Assigning variables to the required data so that we can easily access the data in future.
+
+h<-d$Hours
+s<-d$Scores
+
+#plotting the graph of hours vs scores
+
+plot(d$Hours,d$Scores,xlab= "Hours studied",ylab="Score",main="Hours vs Scores",col="purple")
+
+#the above plot shows a positive linear relationship between the number of hours studied and scores, now lets check the correlation
+
+cor(d$Hours,d$Scores)
+#0.97 shows a very strong correlation
+
+#splitting the data into training and test sets
+
+set.seed(2)
+split<-sample.split(d,SplitRatio = 0.8)
+split
+train<-subset(d,split="TRUE")
+train
+test<-subset(d,split="FALSE")
+test
+
+#Creating a linear model
+
+Model<-lm(d$Scores ~.,data=train)
+Model
+summary(Model)
+
+#Now lets plot the regression line on hours vs score graph
+
+plot(d$Hours,d$Scores,xlab = "Hours studied",ylab = "Score",main="Hours vs Percentage",col="blue")
+abline(Model,col="red")
+
+#Lets make prediction over testing data
+
+Predict<-predict(Model,test)
+Predict
+
+#Comparing actual and predicted values
+
+df<-data.frame(Actual=d$Scores,Predicted=Predict)
+DT::datatable(df)
+
+#Making prediction for the given value hours=9.25
+
+new_data<-data.frame(Hours=c(9.25))
+predict(Model,newdata=new_data)
+#Hence the predicted score is 92.90
+
+#Evaluating the model - lets find the accuracy or Root Mean Square Error
+#RMSE-ROOT MEAN SQUARE VALUE
+
+mse<-mean((d$Scores-Predict)^2)
+mse
+rmse<-sqrt(mse)
+rmse
+
